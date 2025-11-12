@@ -30,7 +30,7 @@ const slides = [
     title: 'Certificaciones',
     subtitle: 'reconocidas internacionalmente',
     gradient: 'from-blue-500 via-indigo-500 to-purple-500',
-    image: 'https://images.pexels.com/photos/4145375/pexels-photo-4145375.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=600',
     icons: [
       { Icon: BookOpen, position: 'top-10 left-10' },
       { Icon: TrendingUp, position: 'top-20 right-20' },
