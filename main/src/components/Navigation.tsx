@@ -25,7 +25,7 @@ export default function Navigation() {
             <img
               src="/header-logo002.fw.png"
               alt="ISDEi Logo"
-              className="h-10 w-auto"
+              className="h-20 w-auto"
             />
           </div>
 

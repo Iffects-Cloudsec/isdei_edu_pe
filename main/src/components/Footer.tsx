@@ -6,9 +6,11 @@ export default function Footer() {
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
-            <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold text-xl inline-block mb-4">
-              ISDEi
-            </div>
+            <img
+              src="/header-logo002.fw.png"
+              alt="ISDEi Logo"
+              className="h-20 w-auto mb-4"
+            />
             <p className="text-gray-400 mb-4">
               Transformando vidas a través de la educación en línea de calidad
             </p>
