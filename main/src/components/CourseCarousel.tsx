@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Users, Star } from 'lucide-react';
 
 const courses = [
@@ -58,7 +58,7 @@ const courses = [
   }
 ];
 
-function CourseCard({ course }: { course: typeof courses[0] }) {
+function CourseCard({ course }: { course: Course }) {
   return (
     <div className="min-w-[300px] max-w-[300px] bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-2">
       <div className="relative overflow-hidden">
@@ -100,8 +100,21 @@ function CourseCard({ course }: { course: typeof courses[0] }) {
   );
 }
 
-function CarouselRow({ title, courses }: { title: string; courses: typeof courses }) {
+type Course = {
+  title: string;
+  instructor: string;
+  duration: string;
+  students: number;
+  rating: number;
+  image: string;
+  category: string;
+};
+
+function CarouselRow({ title, courses }: { title: string; courses: Course[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -112,6 +125,68 @@ function CarouselRow({ title, courses }: { title: string; courses: typeof course
       });
     }
   };
+
+  const updateScrollProgress = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
+    }
+  };
+
+  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (scrollRef.current && progressBarRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percentage = clickX / rect.width;
+      
+      const { scrollWidth, clientWidth } = scrollRef.current;
+      const targetScrollLeft = percentage * (scrollWidth - clientWidth);
+      
+      scrollRef.current.scrollTo({
+        left: targetScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    handleProgressBarClick(e);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      handleProgressBarClick(e);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', updateScrollProgress);
+      updateScrollProgress();
+      
+      return () => {
+        scrollElement.removeEventListener('scroll', updateScrollProgress);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+    
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
 
   return (
     <div className="mb-12">
@@ -135,15 +210,26 @@ function CarouselRow({ title, courses }: { title: string; courses: typeof course
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex gap-6 overflow-x-auto scroll-smooth pb-4"
         >
-          {courses.map((course, idx) => (
+          {courses.map((course: Course, idx: number) => (
             <CourseCard key={idx} course={course} />
           ))}
         </div>
-        <div className="h-1 bg-gray-200 rounded-full mt-4 overflow-hidden">
-          <div className="h-full bg-blue-600 rounded-full w-1/3 animate-pulse"></div>
+        <div
+          ref={progressBarRef}
+          className="h-2 bg-gray-200 rounded-full mt-4 overflow-hidden cursor-pointer relative"
+          onClick={handleProgressBarClick}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        >
+          <div
+            className="h-full bg-blue-600 rounded-full transition-all duration-150 relative"
+            style={{ width: `${scrollProgress}%` }}
+          >
+            <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full shadow-md"></div>
+          </div>
         </div>
       </div>
     </div>
